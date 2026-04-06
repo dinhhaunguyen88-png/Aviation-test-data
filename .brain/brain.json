@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "schema_version": "1.1.0",
+    "awf_version": "4.0.2",
+    "last_updated": "2026-04-06T23:42:00+07:00"
+  },
+  "project": {
+    "name": "test-data-aviation",
+    "description": "Aviation data opensource dashboard - visualize 85K+ airports, routes, runways trên bản đồ tương tác",
+    "type": "web-dashboard",
+    "status": "in-progress",
+    "team_size": "2-10",
+    "created_at": "2026-04-06T22:26:30+07:00"
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "Next.js 16.2.2 (App Router)",
+      "language": "TypeScript",
+      "styling": "TailwindCSS v4",
+      "maps": "Leaflet.js + react-leaflet",
+      "charts": "Recharts",
+      "http": "Axios",
+      "fonts": "Inter + JetBrains Mono (Google Fonts)",
+      "package_manager": "npm"
+    },
+    "backend": {
+      "framework": "Python FastAPI 0.135",
+      "orm": "SQLAlchemy 2.0",
+      "data_processing": "Pandas 2.2",
+      "server": "Uvicorn"
+    },
+    "database": {
+      "type": "SQLite",
+      "path": "data/aviation.db",
+      "tables": 8,
+      "total_records": 251084,
+      "size_mb": 38.5,
+      "status": "populated",
+      "note": "Portable, no server needed for small team"
+    }
+  },
+  "database_schema": {
+    "summary": "8 bảng lưu dữ liệu aviation: sân bay, đường băng, tần số, navaids, quốc gia, vùng, hãng bay, tuyến bay",
+    "tables": [
+      { "name": "countries", "rows": 249, "purpose": "Quốc gia", "source": "OurAirports" },
+      { "name": "regions", "rows": 3942, "purpose": "Vùng/tỉnh trong mỗi quốc gia", "source": "OurAirports" },
+      { "name": "airports", "rows": 85061, "purpose": "Sân bay toàn cầu", "source": "OurAirports" },
+      { "name": "runways", "rows": 47756, "purpose": "Đường băng", "source": "OurAirports" },
+      { "name": "airport_frequencies", "rows": 30241, "purpose": "Tần số liên lạc sân bay", "source": "OurAirports" },
+      { "name": "navaids", "rows": 11010, "purpose": "Thiết bị dẫn đường", "source": "OurAirports" },
+      { "name": "airlines", "rows": 6162, "purpose": "Hãng hàng không", "source": "OpenFlights" },
+      { "name": "routes", "rows": 67663, "purpose": "Tuyến bay", "source": "OpenFlights" }
+    ],
+    "relationships": "airports → runways (1:N), airports → frequencies (1:N), countries → airports (1:N), airlines → routes (1:N)",
+    "integrity_verified": true,
+    "imported_at": "2026-04-06T23:26:49+07:00"
+  },
+  "api_endpoints": [
+    { "method": "GET", "path": "/api/health", "purpose": "Kiểm tra server sống", "status": "done" },
+    { "method": "GET", "path": "/api/airports", "purpose": "Danh sách sân bay (phân trang, lọc)", "status": "planned" },
+    { "method": "GET", "path": "/api/airports/{ident}", "purpose": "Chi tiết 1 sân bay + runways + frequencies", "status": "planned" },
+    { "method": "GET", "path": "/api/airports/search", "purpose": "Tìm kiếm theo ICAO/IATA/tên", "status": "planned" },
+    { "method": "GET", "path": "/api/airports/map", "purpose": "Markers cho bản đồ (theo bounds)", "status": "planned" },
+    { "method": "GET", "path": "/api/routes/{airport}", "purpose": "Tuyến bay từ 1 sân bay", "status": "planned" },
+    { "method": "GET", "path": "/api/stats/overview", "purpose": "KPI tổng quan (counts)", "status": "planned" },
+    { "method": "GET", "path": "/api/stats/countries", "purpose": "Top countries by airport count", "status": "planned" },
+    { "method": "GET", "path": "/api/stats/types", "purpose": "Airport count by type", "status": "planned" },
+    { "method": "GET", "path": "/api/data-freshness", "purpose": "Data sources last update time", "status": "planned" }
+  ],
+  "features": [
+    "Interactive world map (85K+ airports, clustering, dark tiles)",
+    "Dashboard KPIs & statistics with animated counters",
+    "Search & filter airports (ICAO, IATA, name, type, country)",
+    "Airport detail page (runways, frequencies, map)",
+    "Routes viewer on map",
+    "Airport comparison (2 airports side by side)",
+    "Data freshness monitor"
+  ],
+  "decisions": [
+    {
+      "date": "2026-04-06",
+      "decision": "SQLite thay PostgreSQL",
+      "reason": "Team 2-10 người, data < 100MB, read-heavy, portable"
+    },
+    {
+      "date": "2026-04-06",
+      "decision": "Leaflet.js thay Mapbox/Google Maps",
+      "reason": "Open-source, free, phù hợp aviation opensource"
+    },
+    {
+      "date": "2026-04-06",
+      "decision": "Dark Aviation theme (Navy #0a0f1e + Sky Blue #38bdf8)",
+      "reason": "Modern, phù hợp aviation aesthetic, glassmorphism cards"
+    },
+    {
+      "date": "2026-04-06",
+      "decision": "CartoDB Dark Matter map tiles",
+      "reason": "Free dark tile layer, fits dark theme"
+    }
+  ],
+  "current_phase": "phase-02-complete",
+  "plan_folder": "plans/260406-2230-aviation-dashboard",
+  "design_file": "docs/DESIGN.md",
+  "design_specs_file": "docs/design-specs.md",
+  "spec_file": "docs/specs/aviation_dashboard_spec.md"
+}

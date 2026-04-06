@@ -1,4 +1,4 @@
-# python generated files
+# Python
 __pycache__/
 *.py[oc]
 build/
@@ -9,5 +9,23 @@ wheels/
 # venv
 .venv
 
-# .env file 
+# Environment
 .env
+.env.local
+
+# Node
+node_modules/
+.next/
+.turbo/
+
+# Data (large files - re-generate with: python -m scripts.import_data)
+data/aviation.db
+data/csv/
+
+# Brain session (local state)
+.brain/session.json
+.brain/session_log.txt
+
+# OS
+.DS_Store
+Thumbs.db

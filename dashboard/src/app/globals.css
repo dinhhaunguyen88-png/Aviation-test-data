@@ -1,0 +1,263 @@
+@import "tailwindcss";
+
+/* ============================================
+   Aviation Dashboard - Dark Theme
+   Design Specs: docs/design-specs.md
+   ============================================ */
+
+:root {
+  /* Background */
+  --bg-primary: #0a0f1e;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1e293b;
+  --bg-elevated: #1a2332;
+  --bg-glass: rgba(17, 24, 39, 0.8);
+
+  /* Accent */
+  --accent-sky: #38bdf8;
+  --accent-sky-dark: #0ea5e9;
+  --accent-sky-glow: rgba(56, 189, 248, 0.15);
+  --accent-amber: #f59e0b;
+  --accent-emerald: #10b981;
+  --accent-rose: #f43f5e;
+  --accent-violet: #8b5cf6;
+  --accent-cyan: #06b6d4;
+
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Airport Type Colors */
+  --airport-large: #38bdf8;
+  --airport-medium: #10b981;
+  --airport-small: #f59e0b;
+  --airport-heli: #8b5cf6;
+  --airport-closed: #64748b;
+  --airport-sea: #06b6d4;
+
+  /* Border */
+  --border: #1e293b;
+  --border-hover: #334155;
+  --border-active: #38bdf8;
+
+  /* Spacing */
+  --sidebar-width: 240px;
+  --sidebar-collapsed: 64px;
+  --header-height: 64px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --color-sky: var(--accent-sky);
+  --color-amber: var(--accent-amber);
+  --color-emerald: var(--accent-emerald);
+  --color-rose: var(--accent-rose);
+  --color-violet: var(--accent-violet);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-tertiary) transparent;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Glassmorphism Card
+   ============================================ */
+.glass-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  transition: all 200ms ease-out;
+}
+
+.glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.2);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.08);
+}
+
+/* ============================================
+   Dashboard Card
+   ============================================ */
+.dashboard-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all 200ms ease-out;
+}
+
+.dashboard-card:hover {
+  border-color: var(--border-hover);
+}
+
+/* ============================================
+   Stat Card Accent Variants
+   ============================================ */
+.stat-accent-sky { --stat-color: var(--accent-sky); }
+.stat-accent-emerald { --stat-color: var(--accent-emerald); }
+.stat-accent-amber { --stat-color: var(--accent-amber); }
+.stat-accent-violet { --stat-color: var(--accent-violet); }
+
+.stat-accent-sky .stat-icon-bg,
+.stat-accent-emerald .stat-icon-bg,
+.stat-accent-amber .stat-icon-bg,
+.stat-accent-violet .stat-icon-bg {
+  background: color-mix(in srgb, var(--stat-color) 15%, transparent);
+  color: var(--stat-color);
+}
+
+.stat-accent-sky .stat-number,
+.stat-accent-emerald .stat-number,
+.stat-accent-amber .stat-number,
+.stat-accent-violet .stat-number {
+  color: var(--text-primary);
+}
+
+/* ============================================
+   Sidebar Navigation
+   ============================================ */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 150ms ease-out;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+}
+
+.sidebar-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.sidebar-item.active {
+  color: var(--accent-sky);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.sidebar-item.active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: var(--accent-sky);
+  border-radius: 999px;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+  50% { box-shadow: 0 0 20px 4px rgba(56, 189, 248, 0.15); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 400ms ease-out forwards;
+  opacity: 0;
+}
+
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 200ms; }
+.stagger-4 { animation-delay: 300ms; }
+.stagger-5 { animation-delay: 400ms; }
+
+/* ============================================
+   Scrollbar
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* ============================================
+   Leaflet Map Overrides (dark theme)
+   ============================================ */
+.leaflet-container {
+  background: var(--bg-primary) !important;
+  border-radius: var(--radius-lg);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--radius-lg) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-secondary) !important;
+}
+
+.leaflet-control-zoom a {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--bg-tertiary) !important;
+}
