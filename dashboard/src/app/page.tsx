@@ -1,143 +1,193 @@
 "use client";
 
 import Link from "next/link";
+import {
+  BarChart, Bar, PieChart, Pie, Cell,
+  ResponsiveContainer, XAxis, YAxis, Tooltip,
+} from "recharts";
+import KPICard from "@/components/KPICard";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { KPISkeletons, ChartSkeleton } from "@/components/LoadingSkeleton";
+import { useStats, useCountryStats, useTypeStats } from "@/hooks/useStats";
+import { formatNumber, getAirportTypeColor, getAirportTypeLabel } from "@/lib/utils";
+import type { CountryStat } from "@/types/airport";
 
-const stats = [
-  { label: "Airports", value: "85,061", icon: "✈️", accent: "sky" },
-  { label: "Countries", value: "249", icon: "🌍", accent: "emerald" },
-  { label: "Runways", value: "47,756", icon: "🛬", accent: "amber" },
-  { label: "Routes", value: "67,662", icon: "🛫", accent: "violet" },
-];
+export default function DashboardPage() {
+  const { stats, loading: sLoading } = useStats();
+  const { countries, loading: cLoading } = useCountryStats(10);
+  const { types, loading: tLoading } = useTypeStats();
 
-const features = [
-  {
-    title: "Interactive World Map",
-    description: "Explore 85K+ airports on a global map with clustering, filters, and real-time search.",
-    icon: "🗺️",
-    href: "/map",
-  },
-  {
-    title: "Airport Database",
-    description: "Browse, search, and filter the complete airport database with detailed information.",
-    icon: "📋",
-    href: "/airports",
-  },
-  {
-    title: "Statistics & Charts",
-    description: "Analyze airport distribution by type, continent, and country with interactive charts.",
-    icon: "📊",
-    href: "/",
-  },
-  {
-    title: "Route Explorer",
-    description: "Discover flight routes connecting airports worldwide with airline details.",
-    icon: "✈️",
-    href: "/routes",
-  },
-];
+  const kpis = stats
+    ? [
+        { label: "Airports", value: formatNumber(stats.total_airports), icon: "✈️", accent: "sky" as const, subtitle: `Top: ${stats.top_country}` },
+        { label: "Runways", value: formatNumber(stats.total_runways), icon: "🛬", accent: "emerald" as const },
+        { label: "Airlines", value: formatNumber(stats.total_airlines), icon: "🏢", accent: "amber" as const },
+        { label: "Routes", value: formatNumber(stats.total_routes), icon: "🛫", accent: "violet" as const },
+      ]
+    : [];
 
-export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      {/* Hero Section */}
-      <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up stagger-1">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+            Global aviation data at a glance
+          </p>
+        </div>
+        <Link
+          href="/map"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-all hover:brightness-110"
           style={{
-            background: "var(--accent-sky-glow)",
-            border: "1px solid rgba(56,189,248,0.2)",
+            background: "linear-gradient(135deg, var(--accent-sky), var(--accent-sky-dark))",
+            color: "#fff",
           }}
         >
-          <span className="text-sm font-medium" style={{ color: "var(--accent-sky)" }}>
-            ✈️ Open Source Aviation Data
-          </span>
+          🗺️ Open Map
+        </Link>
+      </div>
+
+      {/* KPI Cards */}
+      {sLoading ? (
+        <KPISkeletons count={4} />
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpis.map((kpi, i) => (
+            <KPICard key={kpi.label} {...kpi} index={i} />
+          ))}
         </div>
+      )}
 
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Aviation{" "}
-          <span style={{ color: "var(--accent-sky)" }}>Dashboard</span>
-        </h1>
-
-        <p className="text-lg mb-8" style={{ color: "var(--text-secondary)" }}>
-          Interactive dashboard for exploring airports, routes, runways, and
-          aviation data worldwide. Powered by OurAirports & OpenFlights.
-        </p>
-      </div>
-
-      {/* KPI Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full mb-12">
-        {stats.map((stat, i) => (
-          <div
-            key={stat.label}
-            className={`glass-card p-5 text-center animate-fade-in-up stagger-${i + 1} stat-accent-${stat.accent}`}
-          >
-            <div className="stat-icon-bg w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-3 text-lg">
-              {stat.icon}
-            </div>
-            <div className="stat-number text-2xl md:text-3xl font-bold mb-1">
-              {stat.value}
-            </div>
-            <div className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Feature Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full mb-12">
-        {features.map((feature, i) => (
-          <Link
-            key={feature.title}
-            href={feature.href}
-            className={`dashboard-card p-6 group animate-fade-in-up stagger-${i + 1}`}
-          >
-            <div className="flex items-start gap-4">
-              <div className="text-2xl">{feature.icon}</div>
-              <div>
-                <h3 className="font-semibold mb-1 group-hover:text-[var(--accent-sky)] transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  {feature.description}
-                </p>
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Top Countries Bar Chart */}
+        <ErrorBoundary>
+          {cLoading ? (
+            <ChartSkeleton height={250} />
+          ) : (
+            <div className="dashboard-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-sm">Top Countries by Airports</h2>
+                <Link href="/stats" className="text-xs hover:underline" style={{ color: "var(--accent-sky)" }}>
+                  View all →
+                </Link>
               </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={countries} layout="vertical" margin={{ left: 20 }}>
+                  <XAxis type="number" hide />
+                  <YAxis
+                    type="category"
+                    dataKey="country_code"
+                    width={30}
+                    tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--bg-secondary)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      color: "var(--text-primary)",
+                      fontSize: 12,
+                    }}
+                    formatter={(value: unknown, _: unknown, entry: unknown) => {
+                      const v = value as number;
+                      const e = entry as { payload: CountryStat };
+                      return [formatNumber(v), e.payload.country_name || e.payload.country_code];
+                    }}
+                  />
+                  <Bar dataKey="airport_count" radius={[0, 4, 4, 0]} fill="var(--accent-sky)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </ErrorBoundary>
+
+        {/* Airport Types Pie Chart */}
+        <ErrorBoundary>
+          {tLoading ? (
+            <ChartSkeleton height={250} />
+          ) : (
+            <div className="dashboard-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-sm">Airport Types Distribution</h2>
+                <Link href="/stats" className="text-xs hover:underline" style={{ color: "var(--accent-sky)" }}>
+                  View all →
+                </Link>
+              </div>
+              <div className="flex items-center">
+                <ResponsiveContainer width="50%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={types}
+                      dataKey="count"
+                      nameKey="type"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={90}
+                      strokeWidth={0}
+                    >
+                      {types.map((t) => (
+                        <Cell key={t.type} fill={getAirportTypeColor(t.type)} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        background: "var(--bg-secondary)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 8,
+                        color: "var(--text-primary)",
+                        fontSize: 12,
+                      }}
+                      formatter={(value: unknown) => formatNumber(value as number)}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Legend */}
+                <div className="flex-1 space-y-2 pl-2">
+                  {types.map((t) => (
+                    <div key={t.type} className="flex items-center gap-2">
+                      <div
+                        className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
+                        style={{ background: getAirportTypeColor(t.type) }}
+                      />
+                      <span className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>
+                        {getAirportTypeLabel(t.type)}
+                      </span>
+                      <span className="text-xs ml-auto font-mono" style={{ color: "var(--text-muted)" }}>
+                        {t.percentage}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </ErrorBoundary>
+      </div>
+
+      {/* Quick Links */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Search Airports", href: "/search", icon: "🔍", desc: "Find by ICAO, IATA, name" },
+          { label: "World Map", href: "/map", icon: "🗺️", desc: "85K+ interactive markers" },
+          { label: "Route Explorer", href: "/routes", icon: "✈️", desc: "Discover flight routes" },
+          { label: "Data Sources", href: "/data", icon: "📡", desc: "Freshness & integrity" },
+        ].map((link) => (
+          <Link key={link.href} href={link.href} className="dashboard-card p-4 group">
+            <div className="text-xl mb-2">{link.icon}</div>
+            <div className="font-medium text-sm group-hover:text-[var(--accent-sky)] transition-colors">
+              {link.label}
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {link.desc}
             </div>
           </Link>
         ))}
       </div>
-
-      {/* Setup Status */}
-      <div className="dashboard-card p-6 max-w-4xl w-full animate-fade-in-up stagger-5">
-        <h2 className="font-semibold mb-4 flex items-center gap-2">
-          <span>⚙️</span> Setup Status
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {[
-            { name: "Frontend (Next.js)", status: "✅ Running", ok: true },
-            { name: "Backend (FastAPI)", status: "⏳ Not started", ok: false },
-            { name: "Database (SQLite)", status: "⏳ Not started", ok: false },
-            { name: "Data Import", status: "⏳ Not started", ok: false },
-          ].map((item) => (
-            <div
-              key={item.name}
-              className="flex items-center justify-between px-4 py-2.5 rounded-lg"
-              style={{ background: "var(--bg-tertiary)" }}
-            >
-              <span className="text-sm">{item.name}</span>
-              <span className={`text-xs font-medium ${item.ok ? "text-[var(--accent-emerald)]" : "text-[var(--text-muted)]"}`}>
-                {item.status}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Footer */}
-      <p className="mt-8 text-xs" style={{ color: "var(--text-muted)" }}>
-        Data from OurAirports.com & OpenFlights.org · Built with Next.js + FastAPI
-      </p>
     </div>
   );
 }

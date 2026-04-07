@@ -3,10 +3,12 @@ Aviation Dashboard - FastAPI Backend
 Main entry point for the API server.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from config import settings
+from routers import airports, routes, stats, data
 
 app = FastAPI(
     title="Aviation Dashboard API",
@@ -24,6 +26,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ── Global Error Handler ────────────────────
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch unhandled exceptions and return a clean JSON error."""
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error. Please try again later."},
+    )
+
+
+# ── Register Routers ────────────────────────
+app.include_router(airports.router)
+app.include_router(routes.router)
+app.include_router(stats.router)
+app.include_router(data.router)
 
 
 # ── Health Check ─────────────────────────────
@@ -48,7 +67,7 @@ async def root():
             "/api/airports/search",
             "/api/airports/map",
             "/api/routes/{airport}",
-            "/api/stats/overview",
+            "/api/stats",
             "/api/stats/countries",
             "/api/stats/types",
             "/api/data-freshness",

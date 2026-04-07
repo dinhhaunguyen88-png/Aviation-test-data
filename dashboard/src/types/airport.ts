@@ -1,5 +1,6 @@
 /* ============================================
    Aviation Dashboard - TypeScript Types
+   Aligned with Backend API response schemas
    ============================================ */
 
 // ─── Airport ────────────────────────────────
@@ -16,12 +17,7 @@ export interface Airport {
   iso_region: string | null;
   municipality: string | null;
   scheduled_service: string | null;
-  gps_code: string | null;
   iata_code: string | null;
-  local_code: string | null;
-  home_link: string | null;
-  wikipedia_link: string | null;
-  keywords: string | null;
 }
 
 export type AirportType =
@@ -33,125 +29,134 @@ export type AirportType =
   | "closed"
   | "balloonport";
 
+// ─── Airport Detail (includes runways + frequencies) ──
+export interface AirportDetail extends Airport {
+  gps_code: string | null;
+  local_code: string | null;
+  home_link: string | null;
+  wikipedia_link: string | null;
+  keywords: string | null;
+  runways: Runway[];
+  frequencies: Frequency[];
+}
+
 // ─── Runway ─────────────────────────────────
 export interface Runway {
   id: number;
-  airport_ref: number;
-  airport_ident: string;
   length_ft: number | null;
   width_ft: number | null;
   surface: string | null;
-  lighted: number;
-  closed: number;
+  lighted: number | null;
+  closed: number | null;
   le_ident: string | null;
   he_ident: string | null;
-  le_latitude_deg: number | null;
-  le_longitude_deg: number | null;
-  le_elevation_ft: number | null;
   le_heading_degT: number | null;
-  he_latitude_deg: number | null;
-  he_longitude_deg: number | null;
-  he_elevation_ft: number | null;
   he_heading_degT: number | null;
 }
 
 // ─── Frequency ──────────────────────────────
 export interface Frequency {
   id: number;
-  airport_ref: number;
-  airport_ident: string;
-  type: string;
+  type: string | null;
   description: string | null;
-  frequency_mhz: number;
+  frequency_mhz: number | null;
 }
 
-// ─── Country ────────────────────────────────
-export interface Country {
-  id: number;
-  code: string;
-  name: string;
-  continent: string | null;
-  wikipedia_link: string | null;
-}
-
-// ─── Route ──────────────────────────────────
-export interface Route {
-  id: number;
-  airline: string | null;
-  airline_id: number | null;
-  source_airport: string;
-  source_airport_id: number | null;
-  dest_airport: string;
-  dest_airport_id: number | null;
-  codeshare: string | null;
-  stops: number;
-  equipment: string | null;
-}
-
-// ─── Airline ────────────────────────────────
-export interface Airline {
-  airline_id: number;
-  name: string | null;
-  alias: string | null;
-  iata: string | null;
-  icao: string | null;
-  callsign: string | null;
-  country: string | null;
-  active: string | null;
-}
-
-// ─── API Response Types ─────────────────────
-export interface PaginatedResponse<T> {
-  total: number;
-  page: number;
-  limit: number;
-  data: T[];
-}
-
-export interface AirportDetail {
-  airport: Airport;
-  runways: Runway[];
-  frequencies: Frequency[];
-  country: Country | null;
-}
-
+// ─── Map Marker ─────────────────────────────
 export interface MapAirport {
   id: number;
   ident: string;
-  name: string;
   type: AirportType;
-  lat: number;
-  lng: number;
-  iata: string | null;
-}
-
-export interface SearchResult {
-  ident: string;
   name: string;
+  latitude_deg: number;
+  longitude_deg: number;
   iata_code: string | null;
-  municipality: string | null;
   iso_country: string | null;
-  type: AirportType;
 }
 
-export interface StatsOverview {
-  total_airports: number;
-  total_countries: number;
-  total_runways: number;
-  total_routes: number;
-  total_airlines: number;
-  airports_by_type: Record<string, number>;
-  top_countries: { code: string; name: string; count: number }[];
+// ─── Route ──────────────────────────────────
+export interface RouteDetail {
+  id: number;
+  airline_code: string | null;
+  airline_name: string | null;
+  source_airport: string | null;
+  source_airport_name: string | null;
+  dest_airport: string | null;
+  dest_airport_name: string | null;
+  stops: number | null;
+  equipment: string | null;
 }
 
-export interface CountryStat {
-  code: string;
-  name: string;
+export interface RoutesResponse {
+  outbound: RouteDetail[];
+  inbound: RouteDetail[];
+  total_outbound: number;
+  total_inbound: number;
+}
+
+// ─── API Response Wrappers ──────────────────
+export interface PaginationMeta {
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+export interface AirportListResponse {
+  data: Airport[];
+  pagination: PaginationMeta;
+}
+
+export interface AirportMapResponse {
+  data: MapAirport[];
   count: number;
 }
 
-export interface DataFreshness {
-  source: string;
-  last_modified: string;
+// ─── Stats ──────────────────────────────────
+export interface StatsOverview {
+  total_airports: number;
+  total_runways: number;
+  total_airlines: number;
+  total_routes: number;
+  total_countries: number;
+  total_navaids: number;
+  airports_with_scheduled_service: number;
+  top_country: string | null;
+  top_country_count: number;
+}
+
+export interface CountryStat {
+  country_code: string;
+  country_name: string | null;
+  airport_count: number;
+}
+
+export interface CountryStatsResponse {
+  data: CountryStat[];
+  total_countries: number;
+}
+
+export interface TypeStat {
+  type: string;
+  count: number;
+  percentage: number;
+}
+
+export interface TypeStatsResponse {
+  data: TypeStat[];
+}
+
+// ─── Data Freshness ─────────────────────────
+export interface DataSourceInfo {
+  name: string;
+  table: string;
   row_count: number;
+  source: string;
+}
+
+export interface DataFreshnessResponse {
+  database_path: string;
+  database_size_mb: number;
+  total_records: number;
+  sources: DataSourceInfo[];
 }

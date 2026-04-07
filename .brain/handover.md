@@ -1,84 +1,67 @@
-# Handover Document - Aviation Dashboard
+# Handover: Aviation Data Dashboard
 
-## 📍 Đang làm: Aviation Data Dashboard
-## 🔢 Đến bước: Phase 02 Complete → Sẵn sàng Phase 03
+> **Status:** ✅ PROJECT COMPLETE | **Date:** 2026-04-07
 
----
+## 📍 Tổng quan
 
-### ✅ ĐÃ XONG:
+Dự án **Aviation Data Dashboard** đã hoàn thành 100% (6/6 phases).
+Dashboard hiển thị 252K+ records từ 8 bảng dữ liệu aviation (OurAirports + OpenFlights).
 
-**Planning & Design:**
-- Plan 6 phases tại `plans/260406-2230-aviation-dashboard/`
-- Technical design tại `docs/DESIGN.md` (DB schema 8 bảng, 12 API endpoints, 6 screens)
-- Design specs tại `docs/design-specs.md` (colors, fonts, component CSS)
-- Dashboard mockup tại `docs/mockups/dashboard.png`
+## ✅ Đã hoàn thành
 
-**Phase 01 - Setup (8/8 tasks):**
-- ✅ Next.js 16 app (dashboard/) — dark aviation theme, Inter + JetBrains Mono
-- ✅ TailwindCSS v4 with `globals.css` (glassmorphism, animations, sidebar styles)
-- ✅ Welcome page with animated KPI cards + feature grid
-- ✅ TypeScript types for all aviation entities
-- ✅ API client (axios) with typed functions for all endpoints
-- ✅ Utility functions (formatters, colors, debounce)
-- ✅ FastAPI backend with CORS, health check, config
-- ✅ SQLAlchemy database engine setup + backend folder structure
+| Phase | Mô tả | Tasks |
+|-------|-------|-------|
+| 01 | Setup Environment | 8/8 ✅ |
+| 02 | Database & Import | 10/10 ✅ |
+| 03 | Backend API (FastAPI) | 12/12 ✅ |
+| 04 | Frontend UI (Next.js) | 15/15 ✅ |
+| 05 | Integration & Polish (SWR, Skeletons, ErrorBoundary) | 8/8 ✅ |
+| 06 | Testing & Deploy (16 tests, Docker, README) | 7/7 ✅ |
 
-**Phase 02 - Database & Data Import (10/10 tasks):**
-- ✅ SQLAlchemy models for 8 tables (models/aviation.py)
-- ✅ Downloaded 8 CSV files from OurAirports + OpenFlights (21.9 MB)
-- ✅ Imported 251,084 records into SQLite (42.8s, 38.5 MB)
-- ✅ Indexes created (ident, iata, country, type, coords, name, scheduled)
-- ✅ Data integrity verified: 15/15 tests passed
-- ✅ Performance: ICAO query 0.43ms, country query 1.81ms, geo query 0.48ms
+## 🔧 Quyết định quan trọng
 
----
+- **SQLite** thay PostgreSQL → Portable, read-heavy, <100MB
+- **Leaflet.js** thay Mapbox → Open-source, free
+- **SWR** thay React Query → Lighter cho dashboard
+- **Starlette TestClient** thay httpx live → Faster, no server needed
+- **Dark Aviation theme** → Navy #0a0f1e + Sky Blue #38bdf8
 
-### ⏳ CÒN LẠI:
+## 📁 Files quan trọng
 
-- **Phase 03:** Backend API (12 endpoints: airports, search, map, routes, stats)
-- **Phase 04:** Frontend UI (Dashboard, Map, Airport list, Detail, Routes, Compare)
-- **Phase 05:** Integration (connect frontend ↔ backend)
-- **Phase 06:** Testing & Polish
+- `README.md` — Setup guide + API docs
+- `.brain/brain.json` — Full project knowledge
+- `.brain/session.json` — Session state
+- `.brain/session_log.txt` — Detailed task log
+- `docs/DESIGN.md` — Technical design document
+- `plans/260406-2230-aviation-dashboard/plan.md` — Development plan
 
----
+## 🚀 Cách chạy
 
-### 🔧 QUYẾT ĐỊNH QUAN TRỌNG:
-- SQLite (portable, no server) thay PostgreSQL
-- Leaflet.js (free) thay Mapbox
-- Dark Aviation theme (#0a0f1e + #38bdf8)
-- CartoDB Dark Matter map tiles
-- Next.js 16 (latest, App Router)
-- LEFT JOIN thay NOT IN cho integrity queries (performance)
+```bash
+# Backend
+cd api && python -m uvicorn main:app --reload --port 8000
 
----
+# Frontend
+cd dashboard && npm run dev
 
-### ⚠️ LƯU Ý CHO SESSION SAU:
-- Frontend cần `npm run dev` trong dashboard/ (localhost:3000)
-- Backend cần `python -m uvicorn main:app --reload` trong api/ (localhost:8000)
-- Phase 03 bắt đầu với tạo Pydantic schemas rồi API routers
-- Database đã populated, sẵn sàng cho API queries
-- CSV data sources có sẵn trong data/csv/ (có thể re-import bằng `python -m scripts.import_data --local`)
+# Tests
+cd api && python -m pytest tests/ -v
 
----
+# Docker (nếu cần)
+docker-compose up
+```
 
-### 📁 FILES QUAN TRỌNG:
+## ⚠️ Lưu ý
 
-| File | Mục đích |
-|------|---------|
-| `docs/DESIGN.md` | Thiết kế kỹ thuật chính (DB, API, UI) |
-| `docs/design-specs.md` | Design tokens (colors, fonts, components CSS) |
-| `docs/specs/aviation_dashboard_spec.md` | User stories, acceptance criteria |
-| `.brain/brain.json` | Static knowledge (tech stack, schema, APIs) |
-| `.brain/session.json` | Dynamic state (progress, tasks, db stats) |
-| `plans/260406-2230-aviation-dashboard/plan.md` | Phase tracker |
-| `api/models/aviation.py` | SQLAlchemy models (8 tables) |
-| `api/scripts/import_data.py` | CSV → SQLite import script |
-| `api/scripts/test_integrity.py` | 15 data integrity tests |
-| `api/config.py` | Data source URLs |
-| `data/aviation.db` | SQLite database (38.5 MB, 251K records) |
+- Không có blocker hay test bị skip
+- Database đã populated (38.5 MB, 252K records)
+- Tất cả 16 API tests passed
+- Frontend build: 0 errors, 7 routes
 
----
+## ➡️ Có thể mở rộng
 
-### 📊 Tiến độ: ████░░░░░░ 33% (2/6 phases)
-
-📍 **Để tiếp tục:** Gõ `/recap` rồi `/code phase-03`
+- Export data (CSV/PDF)
+- Airport comparison (side-by-side)
+- Real-time flight tracking (cần API key)
+- User favorites/bookmarks
+- Performance tuning (Redis cache cho production)

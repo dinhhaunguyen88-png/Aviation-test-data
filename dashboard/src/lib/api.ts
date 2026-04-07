@@ -1,13 +1,13 @@
 import axios from "axios";
 import type {
-  PaginatedResponse,
-  Airport,
+  AirportListResponse,
   AirportDetail,
-  MapAirport,
-  SearchResult,
+  AirportMapResponse,
+  RoutesResponse,
   StatsOverview,
-  DataFreshness,
-  CountryStat,
+  CountryStatsResponse,
+  TypeStatsResponse,
+  DataFreshnessResponse,
 } from "@/types/airport";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -20,15 +20,13 @@ const api = axios.create({
 
 // ─── Airports ───────────────────────────────
 export async function getAirports(params: {
-  page?: number;
   limit?: number;
+  offset?: number;
   type?: string;
   country?: string;
   continent?: string;
   scheduled?: string;
-  sort?: string;
-  order?: string;
-}): Promise<PaginatedResponse<Airport>> {
+}): Promise<AirportListResponse> {
   const { data } = await api.get("/api/airports", { params });
   return data;
 }
@@ -39,48 +37,56 @@ export async function getAirportDetail(ident: string): Promise<AirportDetail> {
 }
 
 export async function getMapAirports(params: {
-  bounds: string;
-  zoom?: number;
-  type?: string;
-}): Promise<{ count: number; data: MapAirport[] }> {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+  types?: string;
+  limit?: number;
+}): Promise<AirportMapResponse> {
   const { data } = await api.get("/api/airports/map", { params });
   return data;
 }
 
 export async function searchAirports(
   q: string,
-  limit = 10
-): Promise<{ results: SearchResult[] }> {
+  limit = 20,
+  offset = 0
+): Promise<AirportListResponse> {
   const { data } = await api.get("/api/airports/search", {
-    params: { q, limit },
+    params: { q, limit, offset },
   });
   return data;
 }
 
 // ─── Routes ─────────────────────────────────
-export async function getRoutes(airport: string) {
+export async function getRoutes(airport: string): Promise<RoutesResponse> {
   const { data } = await api.get(`/api/routes/${airport}`);
   return data;
 }
 
 // ─── Stats ──────────────────────────────────
 export async function getStatsOverview(): Promise<StatsOverview> {
-  const { data } = await api.get("/api/stats/overview");
+  const { data } = await api.get("/api/stats");
   return data;
 }
 
-export async function getStatsByCountry(): Promise<CountryStat[]> {
-  const { data } = await api.get("/api/stats/countries");
+export async function getStatsByCountry(
+  limit = 20
+): Promise<CountryStatsResponse> {
+  const { data } = await api.get("/api/stats/countries", {
+    params: { limit },
+  });
   return data;
 }
 
-export async function getStatsByType(): Promise<Record<string, number>> {
+export async function getStatsByType(): Promise<TypeStatsResponse> {
   const { data } = await api.get("/api/stats/types");
   return data;
 }
 
-// ─── Health ─────────────────────────────────
-export async function getDataFreshness(): Promise<DataFreshness[]> {
+// ─── Data ───────────────────────────────────
+export async function getDataFreshness(): Promise<DataFreshnessResponse> {
   const { data } = await api.get("/api/data-freshness");
   return data;
 }

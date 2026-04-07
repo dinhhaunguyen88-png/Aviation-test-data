@@ -2,15 +2,16 @@
   "meta": {
     "schema_version": "1.1.0",
     "awf_version": "4.0.2",
-    "last_updated": "2026-04-06T23:42:00+07:00"
+    "last_updated": "2026-04-07T19:12:00+07:00"
   },
   "project": {
     "name": "test-data-aviation",
     "description": "Aviation data opensource dashboard - visualize 85K+ airports, routes, runways trên bản đồ tương tác",
     "type": "web-dashboard",
-    "status": "in-progress",
+    "status": "complete",
     "team_size": "2-10",
-    "created_at": "2026-04-06T22:26:30+07:00"
+    "created_at": "2026-04-06T22:26:30+07:00",
+    "completed_at": "2026-04-07T19:10:00+07:00"
   },
   "tech_stack": {
     "frontend": {
@@ -20,6 +21,7 @@
       "maps": "Leaflet.js + react-leaflet",
       "charts": "Recharts",
       "http": "Axios",
+      "caching": "SWR (stale-while-revalidate)",
       "fonts": "Inter + JetBrains Mono (Google Fonts)",
       "package_manager": "npm"
     },
@@ -27,16 +29,22 @@
       "framework": "Python FastAPI 0.135",
       "orm": "SQLAlchemy 2.0",
       "data_processing": "Pandas 2.2",
-      "server": "Uvicorn"
+      "server": "Uvicorn",
+      "testing": "pytest + httpx"
     },
     "database": {
       "type": "SQLite",
       "path": "data/aviation.db",
       "tables": 8,
-      "total_records": 251084,
+      "total_records": 252084,
       "size_mb": 38.5,
       "status": "populated",
       "note": "Portable, no server needed for small team"
+    },
+    "deployment": {
+      "docker": "docker-compose.yml + Dockerfiles",
+      "api_dockerfile": "api/Dockerfile (python:3.12-slim)",
+      "dashboard_dockerfile": "dashboard/Dockerfile (node:18-alpine, multi-stage)"
     }
   },
   "database_schema": {
@@ -56,51 +64,95 @@
     "imported_at": "2026-04-06T23:26:49+07:00"
   },
   "api_endpoints": [
-    { "method": "GET", "path": "/api/health", "purpose": "Kiểm tra server sống", "status": "done" },
-    { "method": "GET", "path": "/api/airports", "purpose": "Danh sách sân bay (phân trang, lọc)", "status": "planned" },
-    { "method": "GET", "path": "/api/airports/{ident}", "purpose": "Chi tiết 1 sân bay + runways + frequencies", "status": "planned" },
-    { "method": "GET", "path": "/api/airports/search", "purpose": "Tìm kiếm theo ICAO/IATA/tên", "status": "planned" },
-    { "method": "GET", "path": "/api/airports/map", "purpose": "Markers cho bản đồ (theo bounds)", "status": "planned" },
-    { "method": "GET", "path": "/api/routes/{airport}", "purpose": "Tuyến bay từ 1 sân bay", "status": "planned" },
-    { "method": "GET", "path": "/api/stats/overview", "purpose": "KPI tổng quan (counts)", "status": "planned" },
-    { "method": "GET", "path": "/api/stats/countries", "purpose": "Top countries by airport count", "status": "planned" },
-    { "method": "GET", "path": "/api/stats/types", "purpose": "Airport count by type", "status": "planned" },
-    { "method": "GET", "path": "/api/data-freshness", "purpose": "Data sources last update time", "status": "planned" }
+    { "method": "GET", "path": "/api/health", "purpose": "Kiểm tra server sống, trả về {status, version}", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/airports", "purpose": "Danh sách sân bay (phân trang, lọc country/type/continent/scheduled)", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/airports/{ident}", "purpose": "Chi tiết 1 sân bay + runways + frequencies", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/airports/search?q=", "purpose": "Tìm kiếm theo ICAO/IATA/tên/thành phố (requires q param)", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/airports/map", "purpose": "Markers cho bản đồ (theo bounding box: north/south/east/west)", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/routes/{airport}", "purpose": "Tuyến bay inbound/outbound từ 1 sân bay (by ICAO or IATA)", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/stats", "purpose": "KPI tổng quan (total airports/runways/airlines/routes/countries)", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/stats/countries", "purpose": "Top countries by airport count", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/stats/types", "purpose": "Airport count by type + percentage", "status": "done", "tested": true },
+    { "method": "GET", "path": "/api/data-freshness", "purpose": "Database size, total records, per-table breakdown", "status": "done", "tested": true }
+  ],
+  "frontend_pages": [
+    { "path": "/", "name": "Dashboard", "features": "KPI cards, bar chart (countries), pie chart (types), quick links" },
+    { "path": "/map", "name": "World Map", "features": "85K airports, Leaflet dark tiles, type filters, cluster markers" },
+    { "path": "/airports", "name": "Search & List", "features": "Debounced search, type/country filters, pagination" },
+    { "path": "/airport/[ident]", "name": "Airport Detail", "features": "Info cards, runways table, frequencies table, View Routes button" },
+    { "path": "/routes", "name": "Route Explorer", "features": "Airport search, outbound/inbound routes tables" },
+    { "path": "/stats", "name": "Statistics", "features": "Top 20 countries bar chart, type distribution pie chart" },
+    { "path": "/data", "name": "Data Monitor", "features": "API health, DB size, record counts per source, attribution" }
   ],
   "features": [
     "Interactive world map (85K+ airports, clustering, dark tiles)",
     "Dashboard KPIs & statistics with animated counters",
     "Search & filter airports (ICAO, IATA, name, type, country)",
-    "Airport detail page (runways, frequencies, map)",
-    "Routes viewer on map",
-    "Airport comparison (2 airports side by side)",
-    "Data freshness monitor"
+    "Airport detail page (runways, frequencies)",
+    "Route explorer (outbound/inbound flights)",
+    "Statistics page (top countries, type distribution)",
+    "Data monitor (API health, DB size, source attribution)",
+    "SWR caching (5-min dedup, stale-while-revalidate)",
+    "Loading skeletons (shimmer animation for KPI, charts, tables)",
+    "Error boundaries (fallback UI with retry)",
+    "Responsive sidebar (auto-collapse on tablet)",
+    "Dark aviation theme (Navy #0a0f1e + Sky Blue #38bdf8)"
   ],
-  "decisions": [
-    {
-      "date": "2026-04-06",
-      "decision": "SQLite thay PostgreSQL",
-      "reason": "Team 2-10 người, data < 100MB, read-heavy, portable"
+  "components": [
+    { "name": "Sidebar", "path": "components/Sidebar.tsx", "purpose": "Navigation sidebar with active state highlighting" },
+    { "name": "KPICard", "path": "components/KPICard.tsx", "purpose": "Reusable stat card with icon, value, label" },
+    { "name": "AirportMap", "path": "components/AirportMap.tsx", "purpose": "Leaflet map with dark tiles, markers, clustering" },
+    { "name": "LoadingSkeleton", "path": "components/LoadingSkeleton.tsx", "purpose": "Shimmer skeleton variants (KPI, chart, table)" },
+    { "name": "ErrorBoundary", "path": "components/ErrorBoundary.tsx", "purpose": "React error boundary with themed fallback" }
+  ],
+  "hooks": [
+    { "name": "useStats", "path": "hooks/useStats.ts", "purpose": "SWR hooks for stats, countries, types, freshness, health" },
+    { "name": "useAirports", "path": "hooks/useAirports.ts", "purpose": "SWR hook for airport detail with caching" }
+  ],
+  "testing": {
+    "backend": {
+      "framework": "pytest + Starlette TestClient",
+      "test_count": 16,
+      "all_passed": true,
+      "files": ["api/tests/test_airports.py", "api/tests/test_stats.py", "api/tests/conftest.py"],
+      "run_command": "cd api && python -m pytest tests/ -v"
     },
-    {
-      "date": "2026-04-06",
-      "decision": "Leaflet.js thay Mapbox/Google Maps",
-      "reason": "Open-source, free, phù hợp aviation opensource"
-    },
-    {
-      "date": "2026-04-06",
-      "decision": "Dark Aviation theme (Navy #0a0f1e + Sky Blue #38bdf8)",
-      "reason": "Modern, phù hợp aviation aesthetic, glassmorphism cards"
-    },
-    {
-      "date": "2026-04-06",
-      "decision": "CartoDB Dark Matter map tiles",
-      "reason": "Free dark tile layer, fits dark theme"
+    "frontend": {
+      "build_check": "npm run build → 0 errors, 7 routes",
+      "run_command": "cd dashboard && npm run build"
     }
+  },
+  "decisions": [
+    { "date": "2026-04-06", "decision": "SQLite thay PostgreSQL", "reason": "Team 2-10 người, data < 100MB, read-heavy, portable" },
+    { "date": "2026-04-06", "decision": "Leaflet.js thay Mapbox/Google Maps", "reason": "Open-source, free, phù hợp aviation opensource" },
+    { "date": "2026-04-06", "decision": "Dark Aviation theme (Navy #0a0f1e + Sky Blue #38bdf8)", "reason": "Modern, phù hợp aviation aesthetic, glassmorphism cards" },
+    { "date": "2026-04-06", "decision": "CartoDB Dark Matter map tiles", "reason": "Free dark tile layer, fits dark theme" },
+    { "date": "2026-04-07", "decision": "SWR for caching thay vì React Query", "reason": "Lighter, simpler API cho read-heavy dashboard" },
+    { "date": "2026-04-07", "decision": "Starlette TestClient thay vì live server tests", "reason": "No need for running server, faster, no terminal conflicts" }
   ],
-  "current_phase": "phase-02-complete",
+  "current_phase": "complete",
   "plan_folder": "plans/260406-2230-aviation-dashboard",
   "design_file": "docs/DESIGN.md",
   "design_specs_file": "docs/design-specs.md",
-  "spec_file": "docs/specs/aviation_dashboard_spec.md"
+  "spec_file": "docs/specs/aviation_dashboard_spec.md",
+  "knowledge_items": {
+    "patterns": [
+      "FastAPI + SQLAlchemy (sync mode) cho API read-heavy với SQLite",
+      "SWR hooks pattern: wrap fetcher functions, 5-min dedupingInterval",
+      "Starlette TestClient for sync testing of async FastAPI endpoints",
+      "Leaflet clustering + bounding box queries for large marker datasets"
+    ],
+    "gotchas": [
+      "httpx ASGITransport does NOT support sync Client context manager — use Starlette TestClient instead",
+      "FastAPI search endpoint: q param required (min_length=2) — tests must always provide q",
+      "pip on Windows Python 3.13 can get corrupted — use python -m ensurepip --upgrade to fix",
+      "Next.js dynamic routes with spaces in path — use encodeURIComponent for ICAO codes"
+    ],
+    "conventions": [
+      "All API endpoints prefixed with /api/",
+      "Response format: {data: [...], pagination: {total, limit, offset, has_more}}",
+      "Map endpoint uses north/south/east/west params (not sw/ne)",
+      "Routes endpoint returns {outbound: [...], inbound: [...], total_outbound, total_inbound}"
+    ]
+  }
 }

@@ -1,80 +1,123 @@
-# Open-source Aviation ✈️📈
-A list of open-source aviation projects and data.
+# ✈️ Aviation Data Dashboard
 
-> [!NOTE]
-> Still work-in-progress, feel free to fork and contribute!
+Interactive web dashboard for exploring **85,000+ airports**, routes, runways, and aviation data worldwide.
 
-## Content
-* [ADS-B Data](#ads-b-data)
-* [Airport Data](#airport-data)
-* [Weather Data](#weather-data)
-* [OSINT](#osint)
-* [Tools and Libraries](#tools-and-libraries)
-* [Other Lists](#other-lists)
+![Dashboard](https://img.shields.io/badge/Status-Live-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12+-blue) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![License](https://img.shields.io/badge/License-MIT-yellow)
 
+## Features
 
-## ADS-B Data
-* [ADS-B Exchange](https://www.adsbexchange.com/) - Community-driven ADS-B network, offers free sample data and freemium Rest APIs
+- **📊 Dashboard** — Live KPIs, bar charts, pie charts from 252K+ records
+- **🗺️ Interactive Map** — 85K airports on dark tiles with type filters
+- **🔍 Airport Search** — By ICAO/IATA/name with debounce and filters
+- **✈️ Route Explorer** — Outbound/inbound flights for any airport
+- **📡 Data Monitor** — API health, database size, source attribution
+- **📈 Statistics** — Top 20 countries, airport type distribution
 
+## Tech Stack
 
-## Airport Data
-#### [OurAirports.com](https://ourairports.com/)
-* [ourairports.com](https://ourairports.com/) - Community-driven airport database which includes geo coordinates, airport names and more.
-* [airports.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv) - Raw CSV file of OurAirports.com,  78K+ airports
-* [runways.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv) - Runways information. Including length, width, altitude and more.
-* [airport-frequencies.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-frequencies.csv) - MHZ Airport Frequencies.
-* [countries.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/countries.csv) - Additional Country data
-* [regions.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/regions.csv) - Additional Region Data
-* [navaids.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/navaids.csv)
-* [airport-comments.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-comments.csv) - Community comments
+| Layer | Technology |
+|-------|-----------|
+| Backend | FastAPI, SQLAlchemy, SQLite |
+| Frontend | Next.js 16, TypeScript, Tailwind CSS |
+| Charts | Recharts |
+| Map | Leaflet + React-Leaflet |
+| Caching | SWR (stale-while-revalidate) |
+| Data | OurAirports + OpenFlights |
 
-#### [openflights.org](https://openflights.org/)
-* [airports.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat) - Airport data, might be outdated
-* [airports-extended.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports-extended.dat) - Airports, train stations and ferry terminals, including user contributions
-* [airlines.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat)
-* [routes.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat)
+## Quick Start
 
-#### [aviowiki](https://aviowiki.com/)
-* [free_airports.json.zip](https://exports.aviowiki.com/free_airports.json.zip) - 32K structured airport data
+### Prerequisites
+- Python 3.12+
+- Node.js 18+
+- npm
 
-## Weather Data
-* [NOAA's METAR](https://tgftp.nws.noaa.gov/data/observations/metar/stations/) - Up-to-date METARs, for a specific station you can add the {ICAO}.TXT at the end of the url (e.g. [EGLL](https://tgftp.nws.noaa.gov/data/observations/metar/stations/EGLL.TXT))
-* [AVWX-Engine](https://github.com/avwx-rest/avwx-engine) - Aviation Weather parsing engine. METAR & TAF
+### 1. Clone & Setup Database
 
-## OSINT
-* [skytrack](https://github.com/ANG13T/skytrack) - A planespotting and aircraft OSINT tool made using Python
+```bash
+git clone <repo-url>
+cd Test-data-aviation
 
-## Tools and Libraries
-* [traffic-viz](https://github.com/xoolive/traffic) - A toolbox for processing and analysing air traffic data
-* [pitot](https://github.com/open-aviation/pitot) - A toolbox for aeronautic calculations
-* [openap-top](https://github.com/junzis/openap-top) - Open flight trajectory optimizer built with non-linear optimal control method
-* [aeronautical_charting](https://github.com/antoniolocandro/aeronautical_charting) - Stylesheets for aeronautical charting
-* [qOLS](https://github.com/FLYGHT7/qOLS) - Qgis extension to create Obstacle Limitation Surfaces
+# Install Python deps
+cd api
+pip install -r requirements.txt
 
-## AIXM
-#### [delorean-aixm.io](https://delorean-aixm.io/)
- * [delorean-aixm](https://github.com/3l-gee/delorean-aixm) - ETL tool to manage AIXM dataset with postgresql
+# Import data (downloads CSVs + populates SQLite)
+python scripts/import_data.py
+```
 
-## Sims
-* [AirTrafficSim](https://github.com/HKUST-OCTAD-LAB/AirTrafficSim) - Web-based air traffic simulation and visualization platform for ATM research.
+### 2. Start Backend
 
-## Other Lists
-* [awesome-flying](https://github.com/bauidch/awesome-flying) - A curated list of flying/aviation tools
+```bash
+cd api
+python -m uvicorn main:app --reload --port 8000
+```
 
-----
+API docs available at http://localhost:8000/docs
 
-# Data Metadata
+### 3. Start Frontend
 
-| name                                                                                                                      | last_modified       | row_count   |
-|:--------------------------------------------------------------------------------------------------------------------------|:--------------------|:------------|
-| [airports.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv)                       | 2026-04-06 01:53:15 | 85,061      |
-| [runways.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv)                         | 2026-04-06 01:53:15 | 47,756      |
-| [airport-comments.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-comments.csv)       | 2026-04-05 01:53:14 | 16,086      |
-| [airport-frequencies.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-frequencies.csv) | 2026-04-02 01:53:12 | 30,241      |
-| [regions.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/regions.csv)                         | 2026-03-29 01:53:12 | 3,942       |
-| [navaids.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/navaids.csv)                         | 2025-03-02 02:53:11 | 11,010      |
-| [countries.csv](https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/countries.csv)                     | 2025-02-28 02:53:11 | 249         |
-| [airports.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat)                           | 2019-05-13 11:54:02 | 7,697       |
-| [airports-extended.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports-extended.dat)         | 2019-05-13 11:54:02 | 12,667      |
-| [airlines.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat)                           | 2017-02-02 11:32:12 | 6,161       |
-| [routes.dat](https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat)                               | 2017-02-02 11:32:12 | 67,662      |
+```bash
+cd dashboard
+npm install
+npm run dev
+```
+
+Dashboard available at http://localhost:3000
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+| GET | `/api/airports` | List airports (pagination + filters) |
+| GET | `/api/airports/search?q=` | Search airports |
+| GET | `/api/airports/map` | Map viewport markers |
+| GET | `/api/airports/{ident}` | Airport detail + runways + frequencies |
+| GET | `/api/routes/{airport}` | Outbound/inbound routes |
+| GET | `/api/stats` | Overview statistics |
+| GET | `/api/stats/countries` | Airports by country |
+| GET | `/api/stats/types` | Airports by type |
+| GET | `/api/data-freshness` | Database info + sources |
+
+## Testing
+
+```bash
+# Backend API tests (16 tests)
+cd api
+python -m pytest tests/ -v
+
+# Frontend build check
+cd dashboard
+npm run build
+```
+
+## Project Structure
+
+```
+Test-data-aviation/
+├── api/                    # FastAPI backend
+│   ├── main.py             # App entry point
+│   ├── routers/            # API route handlers
+│   ├── models/             # SQLAlchemy models
+│   ├── schemas/            # Pydantic schemas
+│   ├── tests/              # Pytest test suite
+│   └── config.py           # Settings
+├── dashboard/              # Next.js frontend
+│   └── src/
+│       ├── app/            # Pages (App Router)
+│       ├── components/     # Reusable UI components
+│       ├── hooks/          # SWR data hooks
+│       ├── lib/            # API client + utilities
+│       └── types/          # TypeScript interfaces
+├── data/                   # SQLite database
+└── plans/                  # Development plans
+```
+
+## Data Sources
+
+- **[OurAirports](https://ourairports.com)** — Airports, runways, frequencies, navaids, countries, regions
+- **[OpenFlights](https://openflights.org)** — Airlines and routes
+
+## License
+
+MIT

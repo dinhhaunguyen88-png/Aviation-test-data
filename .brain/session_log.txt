@@ -24,3 +24,74 @@
 [23:37] DONE task: Created test_integrity.py (optimized with LEFT JOIN)
 [23:41] VERIFIED: Data integrity tests 15/15 passed ✅
 [23:41] END phase-02-database ✅ (10/10 tasks)
+[17:38] CODE START: Phase 03 - Backend API
+[17:38] DONE task: Pydantic schemas (schemas/aviation.py)
+[17:39] DONE task: Airport list endpoint (pagination, filters)
+[17:39] DONE task: Airport detail endpoint (+ runways + frequencies)
+[17:39] DONE task: Airport map endpoint (bounding box)
+[17:39] DONE task: Airport search endpoint (ICAO/IATA/name)
+[17:39] DONE task: Routes endpoint (outbound + inbound + airline names)
+[17:40] DONE task: Stats overview endpoint (KPIs)
+[17:40] DONE task: Stats countries endpoint (top countries)
+[17:40] DONE task: Stats types endpoint (pie chart)
+[17:40] DONE task: Data freshness endpoint
+[17:40] DONE task: Register routers + global error handler in main.py
+[17:40] DONE task: CORS middleware (already configured)
+[17:41] VERIFIED: All 10 API endpoints tested ✅
+[17:42] VERIFIED: Swagger UI shows all endpoints ✅
+[17:43] END phase-03-backend ✅ (12/12 tasks)
+[17:46] CODE START: Phase 04 - Frontend UI
+[17:46] DONE task: Updated TypeScript types to match backend API schemas
+[17:46] DONE task: Updated API client to match backend endpoints
+[17:47] DONE task: Root layout with Sidebar + Leaflet CSS
+[17:47] DONE task: Sidebar navigation component (6 nav items, active state)
+[17:47] DONE task: KPICard reusable component
+[17:48] DONE task: Dashboard page (live KPI cards + bar chart + pie chart + quick links)
+[17:48] DONE task: Map page (Leaflet dark tiles, type filters, 1000 viewport markers)
+[17:49] DONE task: MapEvents component (debounced bounds change)
+[17:49] DONE task: Stats page (3 KPIs + Top 20 bar chart + donut chart)
+[17:50] DONE task: Search page (debounce search + type filter + results table)
+[17:50] DONE task: Airport detail page (info grid + runways + frequencies)
+[17:51] DONE task: Routes page (outbound/inbound tabs + route table)
+[17:51] DONE task: Data monitor page (health + DB size + sources + attribution)
+[17:55] FIX: Recharts Tooltip formatter type errors (3 locations)
+[17:56] FIX: PieLabelRenderProps type error
+[17:57] FIX: debounce generic constraint
+[17:57] FIX: useRef initial value for React 19
+[17:57] VERIFIED: npm run build → 0 errors, 7 routes compiled ✅
+[18:18] VERIFIED: Dashboard page live data rendering ✅
+[18:19] VERIFIED: Map page 1000 markers on dark tiles ✅
+[18:19] VERIFIED: Stats page charts rendering ✅
+[18:20] VERIFIED: Search "Noi Bai" → VVNB found ✅
+[18:21] VERIFIED: Routes HAN → 102 outbound/102 inbound ✅
+[18:22] VERIFIED: Airport detail VVNB → 2 runways + 16 frequencies ✅
+[18:22] VERIFIED: Data monitor → Healthy, 38.5 MB, 252K records ✅
+[18:25] END phase-04-frontend ✅ (15/15 tasks)
+[18:29] CODE START: Phase 05 - Integration & Polish
+[18:30] DONE task: Installed SWR for data caching
+[18:30] DONE task: Created useStats hooks (SWR, 5-min cache, dedup)
+[18:30] DONE task: Created useAirports hook (SWR, detail caching)
+[18:31] DONE task: Created LoadingSkeleton + KPISkeletons + ChartSkeleton + TableSkeleton
+[18:31] DONE task: Created ErrorBoundary component (retry button)
+[18:32] DONE task: Refactored Dashboard → SWR hooks + ErrorBoundary + skeletons
+[18:32] DONE task: Refactored Stats → SWR hooks + ErrorBoundary + skeletons
+[18:33] DONE task: Refactored Data → SWR hooks + health auto-refresh
+[18:33] DONE task: Refactored Airport Detail → SWR useAirportDetail hook
+[18:34] DONE task: Added shimmer, page-enter, table-hover, btn-glow, responsive CSS
+[18:34] DONE task: Added focus-visible accessibility ring
+[18:35] VERIFIED: npm run build → 0 errors, 7 routes compiled ✅
+[18:50] VERIFIED: Dashboard rendering with live data ✅
+[18:50] VERIFIED: Airport VVNB detail (2 runways + 16 freq) ✅
+[18:50] VERIFIED: Data monitor (Healthy, 38.5 MB, 252K records) ✅
+[18:51] END phase-05-integration ✅ (8/8 tasks)
+[18:53] CODE START: Phase 06 - Testing & Deploy
+[18:55] DONE task: Fixed pip, installed pytest + httpx
+[18:56] DONE task: Created test_airports.py (10 tests: health, list, search, detail, map)
+[18:56] DONE task: Created test_stats.py (6 tests: overview, countries, types, freshness, routes)
+[18:57] DONE task: Configured conftest.py with Starlette TestClient
+[18:08] VERIFIED: 16/16 API tests PASSED in 1.19s ✅
+[18:08] DONE task: Written comprehensive README.md
+[18:09] DONE task: Created docker-compose.yml + Dockerfiles (api + dashboard)
+[18:09] VERIFIED: npm run build → 0 errors, 7 routes ✅
+[18:09] END phase-06-testing ✅ (7/7 tasks)
+[18:09] 🎉 PROJECT COMPLETE: All 6/6 phases done!
