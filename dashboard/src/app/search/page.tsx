@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { searchAirports, getAirports } from "@/lib/api";
 import { getAirportTypeColor, getAirportTypeLabel, debounce } from "@/lib/utils";
@@ -14,29 +14,30 @@ export default function SearchPage() {
   const [typeFilter, setTypeFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
 
-  const doSearch = useCallback(
-    debounce(async (q: string, type: string, country: string) => {
-      setLoading(true);
-      try {
-        let response: AirportListResponse;
-        if (q.trim().length >= 2) {
-          response = await searchAirports(q, 50, 0);
-        } else {
-          response = await getAirports({
-            limit: 50,
-            offset: 0,
-            ...(type && { type }),
-            ...(country && { country }),
-          });
+  const doSearch = useMemo(
+    () =>
+      debounce(async (q: string, type: string, country: string) => {
+        setLoading(true);
+        try {
+          let response: AirportListResponse;
+          if (q.trim().length >= 2) {
+            response = await searchAirports(q, 50, 0);
+          } else {
+            response = await getAirports({
+              limit: 50,
+              offset: 0,
+              ...(type && { type }),
+              ...(country && { country }),
+            });
+          }
+          setResults(response.data);
+          setTotal(response.pagination.total);
+        } catch (err) {
+          console.error("Search failed:", err);
+        } finally {
+          setLoading(false);
         }
-        setResults(response.data);
-        setTotal(response.pagination.total);
-      } catch (err) {
-        console.error("Search failed:", err);
-      } finally {
-        setLoading(false);
-      }
-    }, 300),
+      }, 300),
     []
   );
 
