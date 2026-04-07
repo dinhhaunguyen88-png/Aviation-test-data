@@ -50,11 +50,22 @@ export async function getMapAirports(params: {
 
 export async function searchAirports(
   q: string,
-  limit = 20,
-  offset = 0
+  params: {
+    limit?: number;
+    offset?: number;
+    type?: string;
+    country?: string;
+  } = {}
 ): Promise<AirportListResponse> {
+  const { limit = 20, offset = 0, type, country } = params;
   const { data } = await api.get("/api/airports/search", {
-    params: { q, limit, offset },
+    params: {
+      q,
+      limit,
+      offset,
+      ...(type && { type }),
+      ...(country && { country }),
+    },
   });
   return data;
 }

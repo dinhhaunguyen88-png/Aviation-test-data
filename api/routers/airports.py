@@ -8,7 +8,7 @@ GET /api/airports/{ident} - Airport detail + runways + frequencies
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import case, func
 
 from database import get_db
 from models.aviation import Airport, Runway, AirportFrequency
@@ -74,24 +74,82 @@ async def search_airports(
     q: str = Query(..., min_length=2, max_length=100, description="Search query (ICAO, IATA, or airport name)"),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    country: str | None = Query(default=None, description="Filter by ISO country code (e.g. US, VN)"),
+    type: str | None = Query(default=None, description="Filter by type (large_airport, medium_airport, small_airport, heliport, closed)"),
     db: Session = Depends(get_db),
 ):
-    """Search airports by ICAO code, IATA code, or name."""
+    """Search airports by ICAO/IATA/code, name, municipality, or keywords."""
     search_term = q.strip()
+    lower_term = search_term.lower()
     upper_term = search_term.upper()
+    upper_prefix = f"{upper_term}%"
+    upper_contains = f"%{upper_term}%"
+    lower_prefix = f"{lower_term}%"
+    lower_contains = f"%{lower_term}%"
+    lower_word_contains = f"% {lower_term}%"
 
-    # Exact ICAO/IATA match first, then fuzzy name match
+    ident_value = func.upper(func.coalesce(Airport.ident, ""))
+    iata_value = func.upper(func.coalesce(Airport.iata_code, ""))
+    gps_value = func.upper(func.coalesce(Airport.gps_code, ""))
+    name_value = func.lower(func.coalesce(Airport.name, ""))
+    municipality_value = func.lower(func.coalesce(Airport.municipality, ""))
+    keywords_value = func.lower(func.coalesce(Airport.keywords, ""))
+
     query = db.query(Airport).filter(
-        (Airport.ident == upper_term)
-        | (Airport.iata_code == upper_term)
-        | (Airport.gps_code == upper_term)
-        | (Airport.name.ilike(f"%{search_term}%"))
-        | (Airport.municipality.ilike(f"%{search_term}%"))
-        | (Airport.keywords.ilike(f"%{search_term}%"))
+        (ident_value.like(upper_contains))
+        | (iata_value.like(upper_contains))
+        | (gps_value.like(upper_contains))
+        | (name_value.like(lower_contains))
+        | (municipality_value.like(lower_contains))
+        | (keywords_value.like(lower_contains))
+    )
+
+    if country:
+        query = query.filter(Airport.iso_country == country.upper())
+    if type:
+        query = query.filter(Airport.type == type)
+
+    relevance_rank = case(
+        (Airport.ident == upper_term, 130),
+        (Airport.iata_code == upper_term, 125),
+        (Airport.gps_code == upper_term, 120),
+        (ident_value.like(upper_prefix), 115),
+        (iata_value.like(upper_prefix), 110),
+        (gps_value.like(upper_prefix), 105),
+        (name_value == lower_term, 100),
+        (municipality_value == lower_term, 95),
+        (name_value.like(lower_prefix), 90),
+        (municipality_value.like(lower_prefix), 85),
+        (keywords_value.like(lower_prefix), 80),
+        (name_value.like(lower_word_contains), 75),
+        (municipality_value.like(lower_word_contains), 70),
+        (name_value.like(lower_contains), 65),
+        (municipality_value.like(lower_contains), 60),
+        (keywords_value.like(lower_contains), 55),
+        else_=0,
+    )
+    scheduled_rank = case((Airport.scheduled_service == "yes", 1), else_=0)
+    type_rank = case(
+        (Airport.type == "large_airport", 5),
+        (Airport.type == "medium_airport", 4),
+        (Airport.type == "small_airport", 3),
+        (Airport.type == "heliport", 2),
+        (Airport.type == "seaplane_base", 1),
+        else_=0,
     )
 
     total = query.count()
-    airports = query.order_by(Airport.type.desc(), Airport.name).offset(offset).limit(limit).all()
+    airports = (
+        query.order_by(
+            relevance_rank.desc(),
+            scheduled_rank.desc(),
+            type_rank.desc(),
+            Airport.name.asc(),
+        )
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
     return AirportListResponse(
         data=[AirportListItem.model_validate(a) for a in airports],

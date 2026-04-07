@@ -17,10 +17,6 @@ const TileLayer = dynamic(
   () => import("react-leaflet").then((m) => m.TileLayer),
   { ssr: false }
 );
-const Rectangle = dynamic(
-  () => import("react-leaflet").then((m) => m.Rectangle),
-  { ssr: false }
-);
 const CircleMarker = dynamic(
   () => import("react-leaflet").then((m) => m.CircleMarker),
   { ssr: false }
@@ -46,17 +42,9 @@ const MAP_TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 const MAP_TILE_URL =
   "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
-const SOUTH_CHINA_SEA_MASK_BOUNDS: [[number, number], [number, number]] = [
-  [8.5, 109.5],
-  [17.5, 119.5],
-];
-const SOUTH_CHINA_SEA_MASK_COLOR = "#c7d8e5";
-const SOUTH_CHINA_SEA_MASK_MAX_ZOOM = 5;
-
 export default function MapPage() {
   const [airports, setAirports] = useState<MapAirport[]>([]);
   const [loading, setLoading] = useState(false);
-  const [zoom, setZoom] = useState(3);
   const [selectedTypes, setSelectedTypes] = useState<string[]>(["large_airport", "medium_airport"]);
   const boundsRef = useRef({ north: 85, south: -85, east: 180, west: -180 });
 
@@ -155,18 +143,7 @@ export default function MapPage() {
             attribution={MAP_TILE_ATTRIBUTION}
             url={MAP_TILE_URL}
           />
-          {zoom <= SOUTH_CHINA_SEA_MASK_MAX_ZOOM && (
-            <Rectangle
-              bounds={SOUTH_CHINA_SEA_MASK_BOUNDS}
-              pathOptions={{
-                stroke: false,
-                fillColor: SOUTH_CHINA_SEA_MASK_COLOR,
-                fillOpacity: 1,
-              }}
-              interactive={false}
-            />
-          )}
-          <MapEventsHandler onBoundsChange={handleBoundsChange} onZoomChange={setZoom} />
+          <MapEventsHandler onBoundsChange={handleBoundsChange} />
           {airports.map((airport) => (
             <CircleMarker
               key={airport.id}

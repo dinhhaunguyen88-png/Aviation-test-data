@@ -20,8 +20,14 @@ export default function SearchPage() {
         setLoading(true);
         try {
           let response: AirportListResponse;
-          if (q.trim().length >= 2) {
-            response = await searchAirports(q, 50, 0);
+          const trimmedQuery = q.trim();
+          if (trimmedQuery.length >= 2) {
+            response = await searchAirports(trimmedQuery, {
+              limit: 50,
+              offset: 0,
+              ...(type && { type }),
+              ...(country && { country }),
+            });
           } else {
             response = await getAirports({
               limit: 50,
